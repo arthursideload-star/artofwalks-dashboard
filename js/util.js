@@ -158,7 +158,7 @@ export function zweistufig(btn, aktion, frage = "Wirklich?") {
     btn.classList.add("bestaetigen");
     btn.replaceChildren(document.createTextNode(frage));
     btn.setAttribute("aria-label", `${frage} Zum Bestätigen noch einmal drücken`);
-    timer = setTimeout(zurueck, 3000);
+    timer = setTimeout(zurueck, 5000);
   });
   btn.addEventListener("blur", () => { if (btn.dataset.schritt === "2") setTimeout(zurueck, 150); });
   return btn;
