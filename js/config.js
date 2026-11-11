@@ -10,7 +10,7 @@ window.AOW_CONFIG = {
   // Konto anlegen und Passwort zurücksetzen laufen über die Website.
   kontoUrl: "https://artofwalks.com/login.html",
   // Google-Login nur, wenn die Dashboard-Adresse bei Supabase als Weiterleitung erlaubt ist.
-  googleLogin: false,
+  googleLogin: true,
   // Ziel des 30-Tage-Plans (für die Stripe-Ansicht): Umsatz in Cent, zahlende Kunden.
   ziel: { umsatzCent: 20000, kunden: 2, ersterKundeTag: 21 },
 };
