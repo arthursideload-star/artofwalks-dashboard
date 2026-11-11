@@ -114,7 +114,18 @@ function abbauen() {
 }
 
 /* ---------- Live ---------- */
+// Höchstens alle 20 Sekunden alles neu laden, damit eine wackelige Live-Verbindung
+// nicht zu einer Dauerschleife von Anfragen wird.
+const NACHLADEN_PAUSE_MS = 20000;
+let letztesNachladen = 0;
+let nachladenGeplant = null;
 function nachladen() {
+  const warte = letztesNachladen + NACHLADEN_PAUSE_MS - Date.now();
+  if (warte > 0) {
+    if (!nachladenGeplant) nachladenGeplant = setTimeout(() => { nachladenGeplant = null; nachladen(); }, warte);
+    return Promise.resolve();
+  }
+  letztesNachladen = Date.now();
   return Promise.all(["dash_aufgaben", "dash_notizen", "dash_leads", "upload_anfragen"].map(ladeTabelle));
 }
 
@@ -122,9 +133,16 @@ function starteLive() {
   abo?.();
   if (!DEMO) {
     let getrennt = false;
-    abo = backend.subscribe(auswirken, (status) => {
-      if (status === "SUBSCRIBED") { state.verbindung = "live"; if (getrennt) { getrennt = false; nachladen(); } }
-      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") { state.verbindung = "offline"; getrennt = true; }
+    abo = backend.subscribe(auswirken, (status, err) => {
+      if (status === "SUBSCRIBED") {
+        state.verbindung = "live";
+        if (getrennt) { getrennt = false; nachladen(); }
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        if (!getrennt) console.warn("Live-Verbindung unterbrochen:", status, err?.message || "");
+        state.verbindung = "offline";
+        getrennt = true;
+      }
+      // CLOSED kommt auch beim eigenen Abmelden des Kanals und löst kein Nachladen aus.
     });
   }
   clearInterval(timer);

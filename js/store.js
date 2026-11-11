@@ -342,7 +342,7 @@ export const leadZuUpload = (id) => state.leads.find((l) => l.upload_id === id);
 /* ---------- Stripe ---------- */
 export async function stripeLaden(erzwingen = false) {
   const s = state.stripe;
-  if (!erzwingen && s.status === "ok" && Date.now() - s.am < 60000) return;
+  if (!erzwingen && (s.status === "ok" || s.status === "nicht_eingerichtet") && Date.now() - s.am < 60000) return;
   if (s.status === "laden") return;
   s.status = "laden";
   emit("stripe");

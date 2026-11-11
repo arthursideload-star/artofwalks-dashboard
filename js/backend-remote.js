@@ -73,11 +73,12 @@ export function createRemote(client) {
 
     /** Realtime für Notizen, Aufgaben, Leads. Gibt eine Abmelde-Funktion zurück. */
     subscribe(onEvent, onStatus) {
-      const ch = client.channel("aow-dashboard");
+      // Eigener Kanalname pro Abo, damit sich ein alter und ein neuer Kanal nicht gegenseitig schließen.
+      const ch = client.channel(`aow-dashboard-${Math.random().toString(36).slice(2, 10)}`);
       for (const t of ["dash_notizen", "dash_aufgaben", "dash_leads"]) {
         ch.on("postgres_changes", { event: "*", schema: "public", table: t }, (p) => onEvent(t, p.eventType, p.new, p.old));
       }
-      ch.subscribe((s) => onStatus && onStatus(s));
+      ch.subscribe((s, err) => onStatus && onStatus(s, err));
       return () => { try { client.removeChannel(ch); } catch { /* egal */ } };
     },
 
